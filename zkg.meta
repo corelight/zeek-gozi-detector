@@ -1,9 +1,8 @@
 [package]
 script_dir = scripts
 test_command = cd testing && btest -c btest.cfg
-summary = TODO: A summary of GoziMalwareDetector in one line
-description = TODO: A more detailed description of GoziMalwareDetector.
-	It can span multiple lines, with this indentation.
+summary = A Zeek based Gozi malware detector.
+description = A Zeek based Gozi malware detector.
 depends = 
 	zeek >=4.0.0
 
