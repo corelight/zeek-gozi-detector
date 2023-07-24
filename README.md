@@ -9,6 +9,8 @@ The RAR files this package looks for were discussed in the following articles:
 - https://unit42.paloaltonetworks.com/march-wireshark-gozi-answers/
 - https://medium.com/@enyel.salas84/unveiling-the-gozi-infection-detecting-gozi-in-an-active-directory-ad-environment-using-9773baebe25f 
 - https://www.microsoft.com/en-us/wdsi/threats/malware-encyclopedia-description?Name=Trojan:Win32/Gozi&threatId=-2147225522 
+- https://github.com/mlodic/ursnif_beacon_decryptor
+- https://github.com/0ver-fl0w/ISFB_Tools
 
 In addition, the long base64 encoded URLs are also detected by this package.
 
