@@ -32,7 +32,8 @@ export {
 	global log_policy: Log::PolicyHook;
 }
 
-global rar_rexex = /.*\/(stilak|cook|vnc)(32|64)\.rar$/;
+# Regex - make them globals so they are compiled only once!
+global rar_regex = /.*\/(stilak|cook|vnc)(32|64)\.rar$/;
 global b64_regex = /^\/[^[:blank:]]+\/([a-zA-Z0-9\/]|_\/?2\/?F|_\/?2\/?B|_\/?0\/?A|_\/?0\/?D){200,}\.[a-zA-Z0-9]+$/;
 
 redef record connection += {
@@ -71,7 +72,7 @@ event http_request(c: connection, method: string, original_URI: string,
 
 	local uri: string = to_lower(unescaped_URI);
 
-	if ( uri == rar_rexex || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 ) ) {
+	if ( uri == rar_regex || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 ) ) {
 		c$gozi$http_method = method;
 		c$gozi$payload = unescaped_URI;
 		log_gozi_detected(c);
