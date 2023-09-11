@@ -73,7 +73,7 @@ event http_request(c: connection, method: string, original_URI: string,
 	local uri: string = to_lower(unescaped_URI);
 
 	# We use the entropy check below to throw out long "normal" URIs that might make it through our checks.
-	# Since the underlying Gozi C2 data is encrypted, entropy should be higher than "normal".  I chose this threshold based upon empiracal tests.
+	# Since the underlying Gozi C2 data is encrypted, entropy should be higher than "normal".  I chose this threshold based upon empirical tests.
 	if ( uri == rar_regex || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) ) {
 		c$gozi$http_method = method;
 		c$gozi$payload = unescaped_URI;
