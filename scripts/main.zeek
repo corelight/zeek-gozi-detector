@@ -38,8 +38,7 @@ export {
 global rar_regex = /.*\/(stilak|cook|vnc)(32|64)\.rar$/i;
 global b64_regex = /^\/[^[:blank:]]+\/([a-zA-Z0-9\/]|_\/?2\/?F|_\/?2\/?B|_\/?0\/?A|_\/?0\/?D){200,}\.[a-zA-Z0-9]+$/;
 
-function log_gozi_detected(c: connection, http_method: string, payload: string,
-    enable_detailed_logs: bool)
+function log_gozi_detected(c: connection, http_method: string, payload: string)
 	{
 	local msg = fmt("Potential Gozi banking malware activity between source %s and dest %s with method %s with payload in the sub field",
 	    c$id$orig_h, c$id$resp_h, http_method);
@@ -71,7 +70,7 @@ event http_request(c: connection, method: string, original_URI: string,
 	    || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) )
 		{
 		add c$http$tags[URI_GOZIMALWARE];
-		log_gozi_detected(c, method, unescaped_URI, enable_detailed_logs);
+		log_gozi_detected(c, method, unescaped_URI);
 		return;
 		}
 	}
