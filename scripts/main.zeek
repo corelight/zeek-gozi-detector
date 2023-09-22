@@ -7,6 +7,9 @@ export {
 	## The notice when the C2 is observed.
 	redef enum Notice::Type += { GoziActivity, };
 
+	## An option to enable detailed logs
+	option enable_detailed_logs = T;
+
 	## Record type containing the column fields of the log.
 	type Info: record {
 		## Timestamp for when the activity happened.
@@ -26,52 +29,48 @@ export {
 
 	## A default logging policy hook for the stream.
 	global log_policy: Log::PolicyHook;
+
+	## Indicator of a request related to GOZI
+	redef enum HTTP::Tags += { URI_GOZIMALWARE, };
 }
 
 # Regex - make them globals so they are compiled only once!
 global rar_regex = /.*\/(stilak|cook|vnc)(32|64)\.rar$/i;
 global b64_regex = /^\/[^[:blank:]]+\/([a-zA-Z0-9\/]|_\/?2\/?F|_\/?2\/?B|_\/?0\/?A|_\/?0\/?D){200,}\.[a-zA-Z0-9]+$/;
 
-redef record connection += {
-	gozi: Info &optional;
-};
-
-# Initialize logging state.
-hook set_session(c: connection)
+function log_gozi_detected(c: connection, http_method: string, payload: string)
 	{
-	if ( c?$gozi )
-		return;
+	local msg = fmt("Potential Gozi banking malware activity between source %s and dest %s with method %s with payload in the sub field",
+	    c$id$orig_h, c$id$resp_h, http_method);
 
-	c$gozi = Info($ts=network_time(), $uid=c$uid, $id=c$id);
-	}
+	if ( enable_detailed_logs )
+		{
+		local info = Info($ts=network_time(), $uid=c$uid, $id=c$id,
+		    $http_method=http_method, $payload=payload);
 
-function log_gozi_detected(c: connection)
-	{
-	if ( ! c?$gozi )
-		return;
+		Log::write(GoziMalwareDetector::LOG, info);
 
-	Log::write(GoziMalwareDetector::LOG, c$gozi);
-
-	NOTICE([ $note=GoziMalwareDetector::GoziActivity, $msg=fmt("Potential Gozi banking malware activity between source %s and dest %s with method %s and URI %s",
-	    c$id$orig_h, c$id$resp_h, c$gozi$http_method, c$gozi$payload),
-	    $conn=c, $identifier=cat(c$id$orig_h, c$id$resp_h) ]);
-
-	delete c$gozi;
+		NOTICE([ $note=GoziMalwareDetector::GoziActivity, $msg=msg, $sub=payload,
+		    $conn=c, $identifier=cat(c$id$orig_h, c$id$resp_h) ]);
+		}
+	else
+		{
+		# Do not suppress notices.
+		NOTICE([ $note=GoziMalwareDetector::GoziActivity, $msg=msg, $sub=payload,
+		    $conn=c ]);
+		}
 	}
 
 event http_request(c: connection, method: string, original_URI: string,
     unescaped_URI: string, version: string)
 	{
-	hook set_session(c);
-
 	# We use the entropy check below to throw out long "normal" URIs that might make it through our checks.
 	# Since the underlying Gozi C2 data is encrypted, entropy should be higher than "normal".  I chose this threshold based upon empirical tests.
 	if ( unescaped_URI == rar_regex
 	    || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) )
 		{
-		c$gozi$http_method = method;
-		c$gozi$payload = unescaped_URI;
-		log_gozi_detected(c);
+		add c$http$tags[URI_GOZIMALWARE];
+		log_gozi_detected(c, method, unescaped_URI);
 		return;
 		}
 	}
