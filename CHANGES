@@ -1,3 +1,4 @@
+v0.1.5:     Added abillity to turn off logs and use just nottices.
 v0.1.4:     Improved run time slightly.
 v0.1.3:     Added entropy check to throw out "normal" URIs seen in a handful of false positives.  
 v0.1.2:     Fixed a typo.
