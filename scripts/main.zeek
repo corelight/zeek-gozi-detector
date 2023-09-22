@@ -31,7 +31,7 @@ export {
 	global log_policy: Log::PolicyHook;
 
 	## Indicator of a request related to GOZI
-	redef enum HTTP::Tags += { URL_GOZIMALWARE, };
+	redef enum HTTP::Tags += { URI_GOZIMALWARE, };
 }
 
 # Regex - make them globals so they are compiled only once!
@@ -70,7 +70,7 @@ event http_request(c: connection, method: string, original_URI: string,
 	if ( unescaped_URI == rar_regex
 	    || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) )
 		{
-		add c$http$tags[URL_GOZIMALWARE];
+		add c$http$tags[URI_GOZIMALWARE];
 		log_gozi_detected(c, method, unescaped_URI, enable_detailed_logs);
 		return;
 		}
