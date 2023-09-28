@@ -77,6 +77,9 @@ event http_request(c: connection, method: string, original_URI: string,
 
 event zeek_init() &priority=5
 	{
-	Log::create_stream(GoziMalwareDetector::LOG, [ $columns=Info, $ev=log_gozi,
-	    $path="gozi", $policy=GoziMalwareDetector::log_policy ]);
+	if ( enable_detailed_logs )
+		{
+		Log::create_stream(GoziMalwareDetector::LOG, [ $columns=Info, $ev=log_gozi,
+			$path="gozi", $policy=GoziMalwareDetector::log_policy ]);
+		}
 	}
