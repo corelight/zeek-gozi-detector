@@ -8,7 +8,7 @@ export {
 	redef enum Notice::Type += { GoziActivity, };
 
 	## An option to enable detailed logs
-	option enable_detailed_logs = T;
+	const enable_detailed_logs = T &redef;
 
 	## Record type containing the column fields of the log.
 	type Info: record {
