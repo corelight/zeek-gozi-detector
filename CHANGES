@@ -1,3 +1,4 @@
+v0.1.8:     Namespace change.
 v0.1.7:     Switch variable from an option to const redef.
 v0.1.6:     Improved testing.
 v0.1.5:     Added ability to turn off logs and just use unsuppressed notices.

@@ -7,4 +7,4 @@
 # @TEST-EXEC: btest-diff http.log
 
 # Turn on the logs.
-redef GoziMalwareDetector::enable_detailed_logs = T;
+redef Gozi::enable_detailed_logs = T;
