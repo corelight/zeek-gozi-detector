@@ -43,6 +43,9 @@ function log_gozi_detected(c: connection, http_method: string, payload: string)
 	local msg = fmt("Potential Gozi banking malware activity between source %s and dest %s with method %s with payload in the sub field",
 	    c$id$orig_h, c$id$resp_h, http_method);
 
+	# tag this HTTP session as matching the pattern of Gozi C2 traffic
+	add c$http$tags[URI_GOZI_C2];
+
 	if ( enable_detailed_logs )
 		{
 		local info = Info($ts=network_time(), $uid=c$uid, $id=c$id,
@@ -69,7 +72,6 @@ event http_request(c: connection, method: string, original_URI: string,
 	if ( unescaped_URI == rar_regex
 	    || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) )
 		{
-		add c$http$tags[URI_GOZI_C2];
 		log_gozi_detected(c, method, unescaped_URI);
 		return;
 		}
