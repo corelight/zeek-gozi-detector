@@ -1,11 +1,11 @@
-module GoziMalwareDetector;
+module Gozi;
 
 export {
 	## Log stream identifier.
 	redef enum Log::ID += { LOG };
 
 	## The notice when the C2 is observed.
-	redef enum Notice::Type += { GoziActivity, };
+	redef enum Notice::Type += { C2_Traffic_Observed, };
 
 	## An option to enable detailed logs
 	const enable_detailed_logs = T &redef;
@@ -31,7 +31,7 @@ export {
 	global log_policy: Log::PolicyHook;
 
 	## Indicator of a request related to GOZI
-	redef enum HTTP::Tags += { URI_GOZIMALWARE, };
+	redef enum HTTP::Tags += { URI_GOZI_C2, };
 }
 
 # Regex - make them globals so they are compiled only once!
@@ -48,15 +48,15 @@ function log_gozi_detected(c: connection, http_method: string, payload: string)
 		local info = Info($ts=network_time(), $uid=c$uid, $id=c$id,
 		    $http_method=http_method, $payload=payload);
 
-		Log::write(GoziMalwareDetector::LOG, info);
+		Log::write(Gozi::LOG, info);
 
-		NOTICE([ $note=GoziMalwareDetector::GoziActivity, $msg=msg, $sub=payload,
+		NOTICE([ $note=Gozi::C2_Traffic_Observed, $msg=msg, $sub=payload,
 		    $conn=c, $identifier=cat(c$id$orig_h, c$id$resp_h) ]);
 		}
 	else
 		{
 		# Do not suppress notices.
-		NOTICE([ $note=GoziMalwareDetector::GoziActivity, $msg=msg, $sub=payload,
+		NOTICE([ $note=Gozi::C2_Traffic_Observed, $msg=msg, $sub=payload,
 		    $conn=c ]);
 		}
 	}
@@ -69,7 +69,7 @@ event http_request(c: connection, method: string, original_URI: string,
 	if ( unescaped_URI == rar_regex
 	    || ( unescaped_URI == b64_regex && count_substr(unescaped_URI, "/") > 10 && find_entropy(unescaped_URI)$entropy > 4 ) )
 		{
-		add c$http$tags[URI_GOZIMALWARE];
+		add c$http$tags[URI_GOZI_C2];
 		log_gozi_detected(c, method, unescaped_URI);
 		return;
 		}
@@ -78,6 +78,6 @@ event http_request(c: connection, method: string, original_URI: string,
 event zeek_init() &priority=5
 	{
 	if ( enable_detailed_logs )
-		Log::create_stream(GoziMalwareDetector::LOG, [ $columns=Info, $ev=log_gozi,
-			$path="gozi", $policy=GoziMalwareDetector::log_policy ]);
+		Log::create_stream(Gozi::LOG, [ $columns=Info, $ev=log_gozi,
+			$path="gozi", $policy=Gozi::log_policy ]);
 	}
