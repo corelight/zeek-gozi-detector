@@ -1,3 +1,4 @@
+v0.1.11:    Metadata changes
 v0.1.10:    Make entropy threshold slightly higher to remove some false positives.
 v0.1.9:     Improved logic to label other http events that are related to Gozi.
 v0.1.8:     Namespace change.
