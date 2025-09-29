@@ -4,8 +4,10 @@ export {
 	## Log stream identifier.
 	redef enum Log::ID += { LOG };
 
-	## The notice when the C2 is observed.
-	redef enum Notice::Type += { C2_Traffic_Observed, };
+	redef enum Notice::Type += {
+		## Gozi banking malware activity detected.
+		C2_Traffic_Observed,
+	};
 
 	## An option to enable detailed logs
 	const enable_detailed_logs = T &redef;
